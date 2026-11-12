@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>TRACKER UMAR — Oylik Odatlar va Intizom Trekeri</title>
+  <style>
+    /* 100% Avtonom CSS — Internet va tashqi CDN'larsiz mukammal ishlaydi */
+    :root {
+      --bg-page: #f1f5f9;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-light: #e2e8f0;
+      --border-grid: #94a3b8;
+      --green: #16a34a;
+      --green-dark: #15803d;
+      --yellow: #eab308;
+      --yellow-dark: #ca8a04;
+      --red: #dc2626;
+      --red-dark: #b91c1c;
+
+      --habit-col-w: 170px;
+      --scale-col-w: 28px;
+      --day-col-w: 27px;
+      --right-pad-w: 18px;
+      --grid-total-w: calc(var(--habit-col-w) + var(--scale-col-w) + (31 * var(--day-col-w)) + var(--right-pad-w));
+    }
+
+    @media (min-width: 1024px) {
+      :root {
+        --habit-col-w: 210px;
+        --scale-col-w: 30px;
+        --day-col-w: 28px;
+        --right-pad-w: 22px;
+      }
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.4;
+    }
+
+    /* Yuqori boshqaruv paneli */
+    .top-toolbar {
+      background-color: #ffffff;
+      border-bottom: 1px solid var(--border-light);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    }
+
+    .toolbar-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background-color: #0f172a;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin: 0;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #15803d;
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+
+    .status-pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: #22c55e;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-secondary {
+      background-color: #f1f5f9;
+      color: #1e293b;
+      border-color: #e2e8f0;
+    }
+    .btn-secondary:hover {
+      background-color: #e2e8f0;
+    }
+
+    .btn-danger {
+      background-color: #fff1f2;
+      color: #be123c;
+      border-color: #fecdd3;
+    }
+    .btn-danger:hover {
+      background-color: #ffe4e6;
+    }
+
+    .btn-primary {
+      background-color: #0f172a;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background-color: #1e293b;
+    }
+
+    /* Asosiy A4 varaq konteyneri */
+    .main-container {
+      max-width: 1180px;
+      margin: 14px auto 36px auto;
+      padding: 0 10px;
+    }
+
+    .sheet-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+      padding: 16px;
+    }
+
+    /* Varaq sarlavhasi (Chap: TRACKER UMAR + Oy/Yil, O'ng: Shartli belgilar) */
+    .sheet-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 12px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .sheet-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sheet-main-heading {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #0f172a;
+      margin: 0;
+      text-transform: uppercase;
+    }
+
+    .month-input {
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      border: none;
+      border-bottom: 2px solid #334155;
+      background: transparent;
+      padding: 2px 4px;
+      width: 185px;
+      outline: none;
+    }
+    .month-input:focus {
+      border-bottom-color: #16a34a;
+    }
+
+    .legend-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-square {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      display: inline-block;
+    }
+
+    /* Gorizontal skroll oynasi (Grafik va 1-31 jadval sinxron yurishi uchun) */
+    .scroll-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .grid-canvas {
+      width: var(--grid-total-w);
+      min-width: var(--grid-total-w);
+    }
+
+    .sticky-left {
+      position: sticky;
+      left: 0;
+      z-index: 20;
+      background-color: #ffffff;
+    }
+
+    /* Yuqori Grafik Qismi */
+    .graph-row {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .intizom-sidebar {
+      width: var(--habit-col-w);
+      min-width: var(--habit-col-w);
+      padding: 6px 10px 4px 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    .intizom-card {
+      flex: 1;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1.5px solid #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px 6px;
+    }
+
+    .intizom-title {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      color: #0f172a;
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+
+    .intizom-score-pill {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background-color: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #065f46;
+    }
+
+    .habits-label {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+      padding-top: 8px;
+    }
+
+    .y-axis-col {
+      width: var(--scale-col-w);
+      min-width: var(--scale-col-w);
+      height: 196px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 4px 6px 4px 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+      border-right: 1.5px solid #475569;
+      user-select: none;
+    }
+
+    .chart-box {
+      width: calc(31 * var(--day-col-w));
+      min-width: calc(31 * var(--day-col-w));
+      height: 196px;
+      position: relative;
+      border-bottom: 1.5px solid #475569;
+      background-color: #ffffff;
+      overflow: hidden;
+    }
+
+    .chart-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .chart-right-pad {
+      width: var(--right-pad-w);
+      min-width: var(--right-pad-w);
+      border-bottom: 1.5px solid #475569;
+    }
+
+    /* Pastki Jadval Qismi */
+    .tracker-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .tracker-table th,
+    .tracker-table td {
+      padding: 0;
+      vertical-align: middle;
+    }
+
+    .th-corner {
+      width: var(--habit-col-w);
+      min-width: var(--habit-col-w);
+      height: 28px;
+      border-bottom: 1.5px solid #475569;
+    }
+
+    .th-scale {
+      width: var(--scale-col-w);
+      min-width: var(--scale-col-w);
+      height: 28px;
+      border-right: 1.5px solid #475569;
+      border-bottom: 1.5px solid #475569;
+    }
+
+    .th-day {
+      width: var(--day-col-w);
+      min-width: var(--day-col-w);
+      height: 28px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #1e293b;
+      text-align: center;
+      border-right: 1px solid var(--border-grid);
+      border-bottom: 1.5px solid #475569;
+      background-color: #f8fafc;
+      user-select: none;
+    }
+
+    .th-end {
+      width: var(--right-pad-w);
+      min-width: var(--right-pad-w);
+      height: 28px;
+      border-bottom: 1.5px solid #475569;
+    }
+
+    .td-habit {
+      width: var(--habit-col-w);
+      min-width: var(--habit-col-w);
+      height: 33px;
+      border-bottom: 1px solid var(--border-grid);
+    }
+
+    .habit-row-flex {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+      padding-right: 4px;
+    }
+
+    .habit-input {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #1e293b;
+      padding: 0 6px;
+      outline: none;
+    }
+    .habit-input::placeholder {
+      color: #94a3b8;
+      font-weight: 400;
+    }
+    .habit-input:focus {
+      background-color: #f8fafc;
+    }
+
+    .del-row-btn {
+      width: 22px;
+      height: 22px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 16px;
+      line-height: 1;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .del-row-btn:hover {
+      background-color: #ffe4e6;
+      color: #e11d48;
+    }
+
+    .td-scale {
+      width: var(--scale-col-w);
+      min-width: var(--scale-col-w);
+      height: 33px;
+      border-right: 1.5px solid #475569;
+      border-bottom: 1px solid var(--border-grid);
+    }
+
+    .td-day {
+      width: var(--day-col-w);
+      min-width: var(--day-col-w);
+      height: 33px;
+      border-right: 1px solid var(--border-grid);
+      border-bottom: 1px solid var(--border-grid);
+      text-align: center;
+    }
+
+    .td-end {
+      width: var(--right-pad-w);
+      min-width: var(--right-pad-w);
+      height: 33px;
+      border-bottom: 1px solid var(--border-grid);
+    }
+
+    .cell-btn {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .cell-btn:active {
+      background-color: #e2e8f0;
+    }
+
+    .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-block;
+      transition: transform 0.12s ease, background-color 0.12s ease;
+    }
+
+    .dot-empty {
+      background-color: transparent;
+      border: 1.6px solid #cbd5e1;
+    }
+    .dot-green {
+      background-color: var(--green);
+      border: 1.5px solid var(--green-dark);
+    }
+    .dot-yellow {
+      background-color: var(--yellow);
+      border: 1.5px solid var(--yellow-dark);
+    }
+    .dot-red {
+      background-color: var(--red);
+      border: 1.5px solid var(--red-dark);
+    }
+
+    /* Pastki statistika va qo'llanma */
+    .sheet-footer {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .footer-hint {
+      font-weight: 600;
+      color: #334155;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .footer-line-sample {
+      width: 16px;
+      height: 3px;
+      border-radius: 99px;
+      background-color: #16a34a;
+      display: inline-block;
+    }
+
+    /* Bir barmoq bilan rang tanlash oynachasi */
+    .color-popover {
+      position: fixed;
+      z-index: 100;
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 7px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.18);
+    }
+    .color-popover.open {
+      display: flex;
+    }
+
+    .pop-choice {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 0;
+    }
+    .pop-choice:active {
+      transform: scale(0.92);
+    }
+    .pop-green { background-color: #16a34a; color: #ffffff; }
+    .pop-yellow { background-color: #eab308; color: #0f172a; }
+    .pop-red { background-color: #dc2626; color: #ffffff; }
+    .pop-clear {
+      background-color: #f1f5f9;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+
+    /* Google Auth Modal / Banner */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      background-color: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .auth-overlay.open {
+      display: flex;
+    }
+    .auth-card {
+      background-color: #ffffff;
+      border-radius: 20px;
+      max-width: 380px;
+      width: 100%;
+      padding: 28px 24px;
+      text-align: center;
+      box-shadow: 0 24px 48px rgba(15, 23, 42, 0.25);
+    }
+    .auth-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background-color: #0f172a;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .auth-title {
+      margin: 0 0 6px 0;
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .auth-desc {
+      margin: 0 0 20px 0;
+      font-size: 13.5px;
+      color: #475569;
+      line-height: 1.5;
+    }
+    .google-btn {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      background-color: #ffffff;
+      color: #0f172a;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+    }
+    .google-btn:hover {
+      background-color: #f8fafc;
+    }
+    .offline-continue-btn {
+      margin-top: 12px;
+      width: 100%;
+      padding: 9px 12px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .auth-error-msg {
+      margin-top: 12px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background-color: #fff1f2;
+      color: #be123c;
+      font-size: 12px;
+      display: none;
+      text-align: left;
+    }
+    .user-chip {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 10px;
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+    }
+    .user-chip.visible {
+      display: inline-flex;
+    }
+    .signout-link {
+      border: none;
+      background: transparent;
+      color: #e11d48;
+      font-weight: 700;
+      font-size: 11.5px;
+      cursor: pointer;
+      padding: 0 0 0 4px;
+    }
+
+    /* Tozalash tasdiq modali */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 110;
+      background-color: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background-color: #ffffff;
+      border-radius: 16px;
+      max-width: 360px;
+      width: 100%;
+      padding: 20px;
+      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.25);
+    }
+
+    .modal-title {
+      margin: 0 0 6px 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .modal-desc {
+      margin: 0 0 16px 0;
+      font-size: 13px;
+      color: #475569;
+    }
+
+    .modal-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal-btn-full {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: none;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* PDF / Chop etish uchun toza A4 Albom (Landscape) rejimi */
+    @page {
+      size: A4 landscape;
+      margin: 7mm;
+    }
+
+    @media print {
+      html, body {
+        background-color: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+      .auth-overlay {
+        display: none !important;
+      }
+
+      .main-container {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+
+      .sheet-card {
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+      }
+
+      .scroll-wrapper {
+        overflow: visible !important;
+      }
+
+      .sticky-left {
+        position: static !important;
+      }
+
+      .grid-canvas {
+        width: 100% !important;
+        min-width: 100% !important;
+      }
+
+      .habit-input::placeholder {
+        color: transparent !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Yuqori Boshqaruv Paneli -->
+  <header class="top-toolbar no-print">
+    <div class="toolbar-inner">
+      <div class="brand-box">
+        <div class="brand-logo">TU</div>
+        <div>
+          <h1 class="brand-title">TRACKER UMAR</h1>
+          <p class="brand-sub">Oylik odatlar va kunlik intizom nazorati</p>
+        </div>
+      </div>
+
+      <div class="toolbar-actions">
+        <span id="userChip" class="user-chip">
+          <span id="userEmailLabel">Google</span>
+          <button id="signOutBtn" type="button" class="signout-link" title="Chiqish">Chiqish</button>
+        </span>
+
+        <span id="saveIndicator" class="status-pill">
+          <span class="status-pill-dot"></span>
+          <span id="saveStatusText">Saqlandi</span>
+        </span>
+
+        <button id="addHabitBtn" type="button" class="btn btn-secondary">
+          + Odat qo‘shish
+        </button>
+
+        <button id="resetBtn" type="button" class="btn btn-danger">
+          Tozalash
+        </button>
+
+        <button id="printBtn" type="button" class="btn btn-primary">
+          PDF / Chop etish
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Asosiy Treker Jadvali -->
+  <main class="main-container">
+    <div class="sheet-card">
+
+      <!-- Varaq Sarlavhasi va Shartli Belgilar -->
+      <div class="sheet-header">
+        <div class="sheet-title-block">
+          <h2 class="sheet-main-heading">TRACKER UMAR</h2>
+          <input
+            id="monthYearInput"
+            type="text"
+            class="month-input"
+            value="Noyabr 2026"
+            placeholder="Oy va yil..."
+            aria-label="Oy va yil"
+          />
+        </div>
+
+        <div class="legend-group">
+          <div class="legend-item">
+            <span class="legend-square" style="background-color: #16a34a;"></span>
+            <span>-Bajarildi</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-square" style="background-color: #eab308;"></span>
+            <span>-Yarmigacha</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-square" style="background-color: #dc2626;"></span>
+            <span>-Bajarilmadi</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sinxron Gorizontal Skroll Maydoni -->
+      <div id="scrollWrapper" class="scroll-wrapper">
+        <div class="grid-canvas">
+
+          <!-- Yuqori Grafik Qismi (1-10 shkala + INTIZOM) -->
+          <div class="graph-row">
+            <!-- Chap Ustun: INTIZOM va Odatlar -->
+            <div class="intizom-sidebar sticky-left">
+              <div class="intizom-card">
+                <div class="intizom-title">INTIZOM</div>
+                <div class="intizom-score-pill">
+                  <span style="width:7px;height:7px;border-radius:50%;background:#16a34a;display:inline-block;"></span>
+                  <span id="avgScoreText">O‘rtacha: 0.0 / 10</span>
+                </div>
+              </div>
+              <div class="habits-label">Odatlar</div>
+            </div>
+
+            <!-- 1 dan 10 gacha vertikal shkala -->
+            <div class="y-axis-col">
+              <span>10</span>
+              <span>9</span>
+              <span>8</span>
+              <span>7</span>
+              <span>6</span>
+              <span>5</span>
+              <span>4</span>
+              <span>3</span>
+              <span>2</span>
+              <span>1</span>
+            </div>
+
+            <!-- SVG Grafik Maydoni (Tog' silueti + Ilonizi chiziq) -->
+            <div class="chart-box">
+              <svg id="disciplineChartSvg" class="chart-svg" viewBox="0 0 868 196" preserveAspectRatio="none">
+                <!-- Fon tog' silueti -->
+                <polygon
+                  points="45,196 165,126 220,142 315,62 365,92 445,18 520,84 575,62 695,148 760,172 825,196"
+                  fill="#f1f5f9"
+                />
+                <polygon
+                  points="445,18 410,66 442,54 464,86 488,58 520,84"
+                  fill="#e2e8f0"
+                  opacity="0.7"
+                />
+                <polygon
+                  points="315,62 286,104 314,94 334,122 352,96 365,92"
+                  fill="#e2e8f0"
+                  opacity="0.7"
+                />
+                <polygon
+                  points="575,62 550,98 576,88 598,116 618,96 695,148"
+                  fill="#e2e8f0"
+                  opacity="0.6"
+                />
+
+                <!-- Gorizontal yordamchi chiziqlar (1-10) -->
+                <g id="chartGuideLines"></g>
+
+                <!-- Dinamik ilonizi chiziq va nuqtalar -->
+                <g id="chartLineLayer"></g>
+              </svg>
+            </div>
+
+            <div class="chart-right-pad"></div>
+          </div>
+
+          <!-- Pastki Jadval Qismi (1-31 kunlar va odatlar) -->
+          <table class="tracker-table">
+            <thead>
+              <tr id="daysHeaderRow">
+                <th class="th-corner sticky-left"></th>
+                <th class="th-scale"></th>
+                <!-- 1..31 kunlar JS orqali yaratiladi -->
+              </tr>
+            </thead>
+            <tbody id="habitsTbody">
+              <!-- Odatlar qatorlari JS orqali yaratiladi -->
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+
+      <!-- Pastki Statistika Satri -->
+      <div class="sheet-footer">
+        <div class="footer-hint">
+          <span class="footer-line-sample"></span>
+          <span>Katakni bosing: yashil, sariq yoki qizil rang tanlang — grafik avtomatik chiziladi</span>
+        </div>
+        <div id="summaryStatsText" style="font-weight: 600; color: #334155;">
+          Bajarildi: 0 • Yarmigacha: 0 • Bajarilmadi: 0
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rang Tanlash Popover Oynachasi -->
+  <div id="colorPopover" class="color-popover no-print" role="dialog" aria-label="Holatni tanlang">
+    <button type="button" class="pop-choice pop-green" data-val="green" title="Bajarildi (10 ball)">&#10003;</button>
+    <button type="button" class="pop-choice pop-yellow" data-val="yellow" title="Yarmigacha (5 ball)">&frac12;</button>
+    <button type="button" class="pop-choice pop-red" data-val="red" title="Bajarilmadi (0 ball)">&#10005;</button>
+    <button type="button" class="pop-choice pop-clear" data-val="empty" title="Tozalash">&#9675;</button>
+  </div>
+
+  <!-- Bir martalik Google kirish oynasi -->
+  <div id="authOverlay" class="auth-overlay no-print" role="dialog" aria-modal="true" aria-labelledby="authHeading">
+    <div class="auth-card">
+      <div class="auth-logo">TU</div>
+      <h3 id="authHeading" class="auth-title">TRACKER UMAR</h3>
+      <p class="auth-desc">
+        Kompyuter va telefoningizdagi natijalar avtomatik sinxronizatsiya bo‘lishi uchun Google akkauntingiz bilan bir marta kiring.
+      </p>
+      <button id="googleSignInBtn" type="button" class="google-btn">
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        <span>Google orqali kirish</span>
+      </button>
+      <div id="authErrorMsg" class="auth-error-msg"></div>
+      <button id="offlineModeBtn" type="button" class="offline-continue-btn">
+        Hozircha kirishsiz (oflayn) davom etish
+      </button>
+    </div>
+  </div>
+
+  <!-- Tozalash Tasdiq Oynasi -->
+  <div id="resetModal" class="modal-backdrop no-print">
+    <div class="modal-box">
+      <h3 class="modal-title">Ma’lumotlarni tozalaysizmi?</h3>
+      <p class="modal-desc">
+        Jadvaldagi barcha belgilarni yoki butun ro‘yxatni noldan tozalashingiz mumkin.
+      </p>
+      <div class="modal-buttons">
+        <button id="clearMarksBtn" type="button" class="modal-btn-full" style="background:#eab308;color:#0f172a;">
+          Faqat belgilarni tozalash (odatlar qolsin)
+        </button>
+        <button id="clearAllBtn" type="button" class="modal-btn-full" style="background:#dc2626;color:#ffffff;">
+          Hammasini noldan tozalash
+        </button>
+        <button id="closeModalBtn" type="button" class="modal-btn-full" style="background:#f1f5f9;color:#334155;">
+          Bekor qilish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signOut,
+      setPersistence,
+      browserLocalPersistence,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    (function () {
+      const firebaseConfig = {
+        apiKey: "AIzaSyCkhOjTct2p5WwEfaMnC5ynrk-b0zdsstI",
+        authDomain: "umar-tracker-ca800.firebaseapp.com",
+        projectId: "umar-tracker-ca800",
+        storageBucket: "umar-tracker-ca800.firebasestorage.app",
+        messagingSenderId: "665583405193",
+        appId: "1:665583405193:web:d9f9d0f11c59928f79de58",
+        measurementId: "G-QKTGR88DTH"
+      };
+
+      const STORAGE_KEY = 'tracker_umar_v1';
+      const SKIP_AUTH_KEY = 'tracker_umar_skip_auth';
+      const DAYS_COUNT = 31;
+      const DEFAULT_ROWS = 10;
+
+      const STARTER_HABITS = [
+        'Ertalab 6:00 Da Turish',
+        '50ta Ajimaniya',
+        'Kitob - Mutola O‘qish 15 bet',
+        'Ingiliz Tili Dars Qilish',
+        'Dasturiy Ish',
+        'Instagram Ishlatmaslik',
+        'Yomon So‘zlar Gapirmaslik',
+        'Online O‘yin O‘ynamaslik',
+        '',
+        ''
+      ];
+
+      let state = {
+        monthYear: 'Noyabr 2026',
+        habits: []
+      };
+
+      let activeTarget = null;
+      let currentUser = null;
+      let unsubscribeSnapshot = null;
+      let cloudSyncTimer = null;
+      let isApplyingRemote = false;
+
+      const monthYearInput = document.getElementById('monthYearInput');
+      const daysHeaderRow = document.getElementById('daysHeaderRow');
+      const habitsTbody = document.getElementById('habitsTbody');
+      const chartGuideLines = document.getElementById('chartGuideLines');
+      const chartLineLayer = document.getElementById('chartLineLayer');
+      const avgScoreText = document.getElementById('avgScoreText');
+      const summaryStatsText = document.getElementById('summaryStatsText');
+      const colorPopover = document.getElementById('colorPopover');
+      const scrollWrapper = document.getElementById('scrollWrapper');
+      const resetModal = document.getElementById('resetModal');
+      const saveStatusText = document.getElementById('saveStatusText');
+
+      const authOverlay = document.getElementById('authOverlay');
+      const googleSignInBtn = document.getElementById('googleSignInBtn');
+      const offlineModeBtn = document.getElementById('offlineModeBtn');
+      const authErrorMsg = document.getElementById('authErrorMsg');
+      const userChip = document.getElementById('userChip');
+      const userEmailLabel = document.getElementById('userEmailLabel');
+      const signOutBtn = document.getElementById('signOutBtn');
+
+      function setSaveStatus(label) {
+        if (saveStatusText) saveStatusText.textContent = label;
+      }
+
+      function createDefaultState() {
+        const list = [];
+        for (let i = 0; i < DEFAULT_ROWS; i++) {
+          list.push({
+            name: STARTER_HABITS[i] || '',
+            days: {}
+          });
+        }
+        return {
+          monthYear: 'Noyabr 2026',
+          habits: list
+        };
+      }
+
+      function normalizeState(parsed) {
+        if (parsed && Array.isArray(parsed.habits) && parsed.habits.length > 0) {
+          return {
+            monthYear: typeof parsed.monthYear === 'string' ? parsed.monthYear : 'Noyabr 2026',
+            habits: parsed.habits.map(function (item) {
+              return {
+                name: item && typeof item.name === 'string' ? item.name : '',
+                days: item && item.days && typeof item.days === 'object' ? item.days : {}
+              };
+            })
+          };
+        }
+        return createDefaultState();
+      }
+
+      function loadLocalState() {
+        try {
+          const raw = window.localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            state = createDefaultState();
+            return;
+          }
+          state = normalizeState(JSON.parse(raw));
+        } catch (e) {
+          state = createDefaultState();
+        }
+      }
+
+      function saveLocalState() {
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {}
+      }
+
+      let app = null;
+      let auth = null;
+      let db = null;
+      const provider = new GoogleAuthProvider();
+
+      try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        setPersistence(auth, browserLocalPersistence).catch(function () {});
+      } catch (err) {
+        console.warn('Firebase init fallback:', err);
+      }
+
+      function getUserDocRef(uid) {
+        return doc(db, 'artifacts', 'umar-tracker-ca800', 'users', uid, 'trackerData', 'currentSheet');
+      }
+
+      function saveState() {
+        saveLocalState();
+        if (!currentUser || !db || isApplyingRemote) {
+          setSaveStatus('Saqlandi');
+          return;
+        }
+        setSaveStatus('Sinxronlanmoqda...');
+        clearTimeout(cloudSyncTimer);
+        cloudSyncTimer = setTimeout(async function () {
+          try {
+            await setDoc(getUserDocRef(currentUser.uid), {
+              monthYear: state.monthYear,
+              habits: state.habits,
+              updatedAt: Date.now()
+            }, { merge: true });
+            setSaveStatus('Bulutga saqlandi');
+          } catch (err) {
+            console.error('Firestore save error:', err);
+            setSaveStatus('Lokal saqlandi');
+          }
+        }, 300);
+      }
+
+      function startCloudListener(user) {
+        if (!db || !user) return;
+        if (unsubscribeSnapshot) {
+          unsubscribeSnapshot();
+          unsubscribeSnapshot = null;
+        }
+        const ref = getUserDocRef(user.uid);
+        unsubscribeSnapshot = onSnapshot(ref, function (snap) {
+          if (snap.exists()) {
+            const data = snap.data();
+            isApplyingRemote = true;
+            state = normalizeState(data);
+            saveLocalState();
+            monthYearInput.value = state.monthYear;
+            renderTable();
+            updateGraphAndStats();
+            isApplyingRemote = false;
+            setSaveStatus('Bulutga saqlandi');
+          } else {
+            // Birinchi marta bulutga hozirgi holatni yuklash
+            saveState();
+          }
+        }, function (err) {
+          console.error('Firestore listener error:', err);
+          setSaveStatus('Lokal rejim');
+        });
+      }
+
+      // 1..31 kun sarlavhalarini qurish
+      function buildDaysHeader() {
+        for (let d = 1; d <= DAYS_COUNT; d++) {
+          const th = document.createElement('th');
+          th.className = 'th-day';
+          th.textContent = String(d);
+          daysHeaderRow.appendChild(th);
+        }
+        const endTh = document.createElement('th');
+        endTh.className = 'th-end';
+        daysHeaderRow.appendChild(endTh);
+      }
+
+      // Grafikdagi 1..10 yordamchi gorizontal chiziqlarni chizish
+      function buildChartGuides() {
+        const svgNS = 'http://www.w3.org/2000/svg';
+        chartGuideLines.innerHTML = '';
+        for (let lvl = 1; lvl <= 10; lvl++) {
+          const y = (((10 - lvl) / 9) * 0.86 + 0.07) * 196;
+          const line = document.createElementNS(svgNS, 'line');
+          line.setAttribute('x1', '0');
+          line.setAttribute('y1', y.toFixed(1));
+          line.setAttribute('x2', '868');
+          line.setAttribute('y2', y.toFixed(1));
+          line.setAttribute('stroke', '#e2e8f0');
+          line.setAttribute('stroke-width', '1');
+          chartGuideLines.appendChild(line);
+        }
+      }
+
+      // Odatlar jadvalini chizish
+      function renderTable() {
+        habitsTbody.innerHTML = '';
+        state.habits.forEach(function (habit, rowIdx) {
+          const tr = document.createElement('tr');
+
+          const tdHabit = document.createElement('td');
+          tdHabit.className = 'td-habit sticky-left';
+
+          const rowFlex = document.createElement('div');
+          rowFlex.className = 'habit-row-flex';
+
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'habit-input';
+          input.value = habit.name;
+          input.placeholder = 'Odat yozing...';
+          input.setAttribute('aria-label', (rowIdx + 1) + '-odat');
+          input.addEventListener('input', function (e) {
+            state.habits[rowIdx].name = e.target.value;
+            saveState();
+          });
+
+          rowFlex.appendChild(input);
+
+          if (state.habits.length > 1) {
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'del-row-btn no-print';
+            delBtn.title = 'Qatorni o‘chirish';
+            delBtn.innerHTML = '&times;';
+            delBtn.addEventListener('click', function () {
+              state.habits.splice(rowIdx, 1);
+              saveState();
+              renderTable();
+              updateGraphAndStats();
+            });
+            rowFlex.appendChild(delBtn);
+          }
+
+          tdHabit.appendChild(rowFlex);
+          tr.appendChild(tdHabit);
+
+          const tdScale = document.createElement('td');
+          tdScale.className = 'td-scale';
+          tr.appendChild(tdScale);
+
+          for (let day = 1; day <= DAYS_COUNT; day++) {
+            const tdDay = document.createElement('td');
+            tdDay.className = 'td-day';
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'cell-btn';
+            btn.dataset.row = String(rowIdx);
+            btn.dataset.day = String(day);
+            btn.setAttribute('aria-label', day + '-kun');
+
+            const status = habit.days[String(day)] || 'empty';
+            const dot = document.createElement('span');
+            dot.className = 'dot dot-' + status;
+            btn.appendChild(dot);
+
+            (function (rIdx, dNum, buttonEl) {
+              buttonEl.addEventListener('click', function (e) {
+                e.stopPropagation();
+                openPopover(buttonEl, rIdx, dNum);
+              });
+            })(rowIdx, day, btn);
+
+            tdDay.appendChild(btn);
+            tr.appendChild(tdDay);
+          }
+
+          const tdEnd = document.createElement('td');
+          tdEnd.className = 'td-end';
+          tr.appendChild(tdEnd);
+
+          habitsTbody.appendChild(tr);
+        });
+      }
+
+      function openPopover(anchorBtn, rowIdx, day) {
+        activeTarget = { rowIdx: rowIdx, day: day };
+        colorPopover.classList.add('open');
+
+        const rect = anchorBtn.getBoundingClientRect();
+        const popW = colorPopover.offsetWidth || 176;
+        const popH = colorPopover.offsetHeight || 52;
+
+        let left = rect.left + rect.width / 2 - popW / 2;
+        let top = rect.top - popH - 8;
+
+        if (top < 8) top = rect.bottom + 8;
+        if (left < 8) left = 8;
+        if (left + popW > window.innerWidth - 8) {
+          left = window.innerWidth - popW - 8;
+        }
+
+        colorPopover.style.left = left + 'px';
+        colorPopover.style.top = top + 'px';
+      }
+
+      function closePopover() {
+        colorPopover.classList.remove('open');
+        activeTarget = null;
+      }
+
+      function updateGraphAndStats() {
+        let greenTotal = 0;
+        let yellowTotal = 0;
+        let redTotal = 0;
+        const points = [];
+        const colW = 868 / 31;
+
+        let sumScores = 0;
+        let scoredDays = 0;
+
+        for (let day = 1; day <= DAYS_COUNT; day++) {
+          let dayPoints = 0;
+          let markedCount = 0;
+
+          for (let i = 0; i < state.habits.length; i++) {
+            const val = state.habits[i].days[String(day)];
+            if (val === 'green') {
+              dayPoints += 10;
+              markedCount++;
+              greenTotal++;
+            } else if (val === 'yellow') {
+              dayPoints += 5;
+              markedCount++;
+              yellowTotal++;
+            } else if (val === 'red') {
+              dayPoints += 0;
+              markedCount++;
+              redTotal++;
+            }
+          }
+
+          if (markedCount > 0) {
+            const avg = dayPoints / markedCount;
+            sumScores += avg;
+            scoredDays++;
+
+            const clamped = Math.max(1, Math.min(10, avg < 1 ? 1 : avg));
+            const x = (day - 0.5) * colW;
+            const y = (((10 - clamped) / 9) * 0.86 + 0.07) * 196;
+            points.push({ day: day, avg: avg, x: x, y: y });
+          }
+        }
+
+        summaryStatsText.textContent =
+          'Bajarildi: ' + greenTotal + ' • Yarmigacha: ' + yellowTotal + ' • Bajarilmadi: ' + redTotal;
+
+        if (scoredDays > 0) {
+          avgScoreText.textContent = 'O‘rtacha: ' + (sumScores / scoredDays).toFixed(1) + ' / 10';
+        } else {
+          avgScoreText.textContent = 'O‘rtacha: 0.0 / 10';
+        }
+
+        const svgNS = 'http://www.w3.org/2000/svg';
+        chartLineLayer.innerHTML = '';
+
+        if (points.length === 0) return;
+
+        if (points.length >= 2) {
+          let d = 'M ' + points[0].x.toFixed(1) + ',' + points[0].y.toFixed(1);
+          for (let j = 0; j < points.length - 1; j++) {
+            const p0 = points[j === 0 ? j : j - 1];
+            const p1 = points[j];
+            const p2 = points[j + 1];
+            const p3 = points[j + 2 < points.length ? j + 2 : j + 1];
+
+            const tension = 0.25;
+            const cp1x = p1.x + (p2.x - p0.x) * tension;
+            const cp1y = Math.max(8, Math.min(188, p1.y + (p2.y - p0.y) * tension));
+            const cp2x = p2.x - (p3.x - p1.x) * tension;
+            const cp2y = Math.max(8, Math.min(188, p2.y - (p3.y - p1.y) * tension));
+
+            d += ' C ' + cp1x.toFixed(1) + ',' + cp1y.toFixed(1) +
+                 ' ' + cp2x.toFixed(1) + ',' + cp2y.toFixed(1) +
+                 ' ' + p2.x.toFixed(1) + ',' + p2.y.toFixed(1);
+          }
+
+          const path = document.createElementNS(svgNS, 'path');
+          path.setAttribute('d', d);
+          path.setAttribute('fill', 'none');
+          path.setAttribute('stroke', '#16a34a');
+          path.setAttribute('stroke-width', '2.8');
+          path.setAttribute('stroke-linecap', 'round');
+          path.setAttribute('stroke-linejoin', 'round');
+          chartLineLayer.appendChild(path);
+        }
+
+        for (let k = 0; k < points.length; k++) {
+          const pt = points[k];
+          const dotColor = pt.avg >= 7.5 ? '#16a34a' : (pt.avg >= 4 ? '#eab308' : '#dc2626');
+          const circle = document.createElementNS(svgNS, 'circle');
+          circle.setAttribute('cx', pt.x.toFixed(1));
+          circle.setAttribute('cy', pt.y.toFixed(1));
+          circle.setAttribute('r', '4');
+          circle.setAttribute('fill', dotColor);
+          circle.setAttribute('stroke', '#ffffff');
+          circle.setAttribute('stroke-width', '1.6');
+          chartLineLayer.appendChild(circle);
+        }
+      }
+
+      colorPopover.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const btn = e.target.closest('button[data-val]');
+        if (!btn || !activeTarget) return;
+
+        const val = btn.getAttribute('data-val');
+        const rIdx = activeTarget.rowIdx;
+        const dayKey = String(activeTarget.day);
+
+        if (val === 'empty') {
+          delete state.habits[rIdx].days[dayKey];
+        } else {
+          state.habits[rIdx].days[dayKey] = val;
+        }
+
+        const cellBtn = habitsTbody.querySelector(
+          'button[data-row="' + rIdx + '"][data-day="' + dayKey + '"]'
+        );
+        if (cellBtn) {
+          const dotEl = cellBtn.querySelector('.dot');
+          if (dotEl) {
+            dotEl.className = 'dot dot-' + val;
+          }
+        }
+
+        saveState();
+        updateGraphAndStats();
+        closePopover();
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!colorPopover.contains(e.target)) {
+          closePopover();
+        }
+      });
+
+      scrollWrapper.addEventListener('scroll', closePopover, { passive: true });
+
+      monthYearInput.addEventListener('input', function (e) {
+        state.monthYear = e.target.value;
+        saveState();
+      });
+
+      document.getElementById('addHabitBtn').addEventListener('click', function () {
+        state.habits.push({ name: '', days: {} });
+        saveState();
+        renderTable();
+        const inputs = habitsTbody.querySelectorAll('.habit-input');
+        if (inputs.length > 0) {
+          inputs[inputs.length - 1].focus();
+        }
+      });
+
+      document.getElementById('printBtn').addEventListener('click', function () {
+        closePopover();
+        window.print();
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', function () {
+        closePopover();
+        resetModal.classList.add('open');
+      });
+
+      document.getElementById('closeModalBtn').addEventListener('click', function () {
+        resetModal.classList.remove('open');
+      });
+
+      resetModal.addEventListener('click', function (e) {
+        if (e.target === resetModal) {
+          resetModal.classList.remove('open');
+        }
+      });
+
+      document.getElementById('clearMarksBtn').addEventListener('click', function () {
+        for (let i = 0; i < state.habits.length; i++) {
+          state.habits[i].days = {};
+        }
+        saveState();
+        renderTable();
+        updateGraphAndStats();
+        resetModal.classList.remove('open');
+      });
+
+      document.getElementById('clearAllBtn').addEventListener('click', function () {
+        state = createDefaultState();
+        monthYearInput.value = state.monthYear;
+        saveState();
+        renderTable();
+        updateGraphAndStats();
+        resetModal.classList.remove('open');
+      });
+
+      // Google Kirish tugmasi
+      googleSignInBtn.addEventListener('click', async function () {
+        if (!auth) {
+          authOverlay.classList.remove('open');
+          return;
+        }
+        authErrorMsg.style.display = 'none';
+        try {
+          await setPersistence(auth, browserLocalPersistence);
+          await signInWithPopup(auth, provider);
+          try { window.localStorage.removeItem(SKIP_AUTH_KEY); } catch (e) {}
+          authOverlay.classList.remove('open');
+        } catch (err) {
+          authErrorMsg.style.display = 'block';
+          if (err && err.code === 'auth/unauthorized-domain') {
+            authErrorMsg.textContent =
+              'Domen ruxsat etilmagan. Firebase Authentication → Settings → Authorized domains bo‘limiga ushbu sayt domenini qo‘shing.';
+          } else {
+            authErrorMsg.textContent = 'Kirishda xatolik: ' + (err.message || err.code);
+          }
+        }
+      });
+
+      offlineModeBtn.addEventListener('click', function () {
+        try { window.localStorage.setItem(SKIP_AUTH_KEY, '1'); } catch (e) {}
+        authOverlay.classList.remove('open');
+      });
+
+      signOutBtn.addEventListener('click', async function () {
+        if (unsubscribeSnapshot) {
+          unsubscribeSnapshot();
+          unsubscribeSnapshot = null;
+        }
+        if (auth) {
+          try { await signOut(auth); } catch (e) {}
+        }
+        currentUser = null;
+        userChip.classList.remove('visible');
+        try { window.localStorage.removeItem(SKIP_AUTH_KEY); } catch (e) {}
+        authOverlay.classList.add('open');
+      });
+
+      // Boshlang'ich yuklash (hech qachon oq ekran bo'lmasligi uchun avval lokal render qilinadi)
+      loadLocalState();
+      monthYearInput.value = state.monthYear;
+      buildDaysHeader();
+      buildChartGuides();
+      renderTable();
+      updateGraphAndStats();
+
+      if (auth) {
+        onAuthStateChanged(auth, function (user) {
+          if (user) {
+            currentUser = user;
+            authOverlay.classList.remove('open');
+            userEmailLabel.textContent = user.email || 'Google';
+            userChip.classList.add('visible');
+            startCloudListener(user);
+          } else {
+            currentUser = null;
+            userChip.classList.remove('visible');
+            let skipped = false;
+            try { skipped = window.localStorage.getItem(SKIP_AUTH_KEY) === '1'; } catch (e) {}
+            if (!skipped) {
+              authOverlay.classList.add('open');
+            }
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
